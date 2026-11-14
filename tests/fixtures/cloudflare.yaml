@@ -1,0 +1,4 @@
+schema_version: 1
+resources:
+  - {provider: cloudflare, kind: zone, id: "00000000000000000000000000000001", name: portfolio.example, attributes: {status: active, paused: false}}
+  - {provider: cloudflare, kind: dns_record, id: "00000000000000000000000000000002", name: api.portfolio.example, attributes: {zone_id: "00000000000000000000000000000001", type: A, content: 192.0.2.10, proxied: true, ttl: 1}}

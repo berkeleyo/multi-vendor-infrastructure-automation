@@ -1,0 +1,8 @@
+version: 1
+mode: offline
+providers:
+  aws: {fixture: ../tests/fixtures/aws.yaml}
+  azure: {fixture: ../tests/fixtures/azure.yaml}
+  cloudflare: {fixture: ../tests/fixtures/cloudflare.yaml}
+  palo_alto: {fixture: ../tests/fixtures/palo_alto.yaml}
+

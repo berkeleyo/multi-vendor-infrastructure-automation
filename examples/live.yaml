@@ -1,0 +1,12 @@
+version: 1
+mode: live
+providers:
+  aws:
+    region: eu-west-2
+  azure:
+    subscription_id: 00000000-0000-4000-8000-000000000001
+  cloudflare:
+    zone_ids: ["00000000000000000000000000000001"]
+  palo_alto:
+    base_url: https://firewall.example.net
+

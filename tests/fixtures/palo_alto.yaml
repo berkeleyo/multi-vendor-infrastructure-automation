@@ -1,0 +1,3 @@
+schema_version: 1
+resources:
+  - {provider: palo_alto, kind: address_object, id: documentation-service, name: documentation-service, attributes: {value: 198.51.100.10, value_type: ip-netmask, description: Synthetic documentation endpoint}}
