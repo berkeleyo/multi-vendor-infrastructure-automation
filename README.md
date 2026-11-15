@@ -35,6 +35,26 @@ CI installs and audits the reviewed base, AWS, and Azure Python resolution in `c
 in `pyproject.toml` so downstream users can receive compatible security fixes; update the constraints
 file deliberately after testing and auditing.
 
+## Opt-in live provider verification
+
+The `verify-live` command makes an explicit, read-only API discovery request against **one
+configured provider at a time**. It refuses offline fixtures, missing confirmation, disabled
+providers and disabled TLS verification. Cloudflare requires explicit `zone_ids`.
+
+```bash
+# Only after replacing placeholder values and arranging least-privilege read credentials:
+mvia verify-live --config examples/live.yaml --provider cloudflare --confirm-read-only
+```
+
+The command prints structured JSON with the selected provider, completion status and counts by
+resource type, **not** resource IDs, names or raw provider responses. A successful return means the
+selected adapter completed its reads; it is not a security audit, a guarantee of complete
+inventory, or proof of least privilege. No live verification is run automatically in CI.
+The operator must review the exact account, subscription, region or zones and provider identity
+before executing it. AWS/Azure calls may enumerate all networks within the configured
+region/subscription; Palo Alto reads shared address objects on the configured appliance.
+See [RUNBOOK.md](RUNBOOK.md) and [security](docs/SECURITY.md).
+
 ## Engineering lifecycle
 
 **Plan → Build → Test → Deploy → Operate → Improve**: define normalized contracts and least privilege; implement isolated adapters; verify offline and mocked boundaries; package without deploying infrastructure; run observable read-only discovery; then improve coverage and supported resources from operational evidence.
