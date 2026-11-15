@@ -60,7 +60,9 @@ def run(argv: list[str] | None = None) -> int:
             if not args.confirm_read_only:
                 raise ConfigurationError("verify-live requires --confirm-read-only")
             if config.mode != "live":
-                raise ConfigurationError("verify-live requires mode: live; fixtures are not evidence")
+                raise ConfigurationError(
+                    "verify-live requires mode: live; fixtures are not evidence"
+                )
             selected = config.providers.get(args.provider)
             if selected is None or not selected.enabled:
                 raise ConfigurationError("selected live provider must be configured and enabled")
@@ -75,15 +77,17 @@ def run(argv: list[str] | None = None) -> int:
             counts: dict[str, int] = {}
             for item in actual.resources:
                 counts[item.kind] = counts.get(item.kind, 0) + 1
-            emit({
-                "ok": True,
-                "command": "verify-live",
-                "mode": "live",
-                "provider": args.provider.value,
-                "status": "read_only_discovery_completed",
-                "resource_counts": dict(sorted(counts.items())),
-                "note": "Live API read completed; permissions and scope require operator review.",
-            })
+            emit(
+                {
+                    "ok": True,
+                    "command": "verify-live",
+                    "mode": "live",
+                    "provider": args.provider.value,
+                    "status": "read_only_discovery_completed",
+                    "resource_counts": dict(sorted(counts.items())),
+                    "note": "Live API read completed; permissions and scope require operator review.",
+                }
+            )
             return 0
         actual = discover(config, config_dir=args.config.resolve().parent)
         if args.command == "discover":
