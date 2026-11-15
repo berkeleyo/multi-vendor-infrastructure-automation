@@ -19,9 +19,9 @@ def test_verify_live_requires_opt_in_and_rejects_fixtures(
     )
     assert run(["verify-live", "--config", str(path), "--provider", "aws"]) == 1
     assert "confirm-read-only" in capsys.readouterr().out
-    assert run(
-        ["verify-live", "--config", str(path), "--provider", "aws", "--confirm-read-only"]
-    ) == 1
+    assert (
+        run(["verify-live", "--config", str(path), "--provider", "aws", "--confirm-read-only"]) == 1
+    )
     assert "requires mode: live" in capsys.readouterr().out
 
 
@@ -46,9 +46,9 @@ def test_verify_live_scopes_provider_and_redacts_inventory(
         )
 
     monkeypatch.setattr("mvia.cli.discover", fake_discover)
-    assert run(
-        ["verify-live", "--config", str(path), "--provider", "aws", "--confirm-read-only"]
-    ) == 0
+    assert (
+        run(["verify-live", "--config", str(path), "--provider", "aws", "--confirm-read-only"]) == 0
+    )
     output = capsys.readouterr().out
     payload = json.loads(output)
     assert payload["resource_counts"] == {"vpc": 1}
@@ -75,7 +75,8 @@ def test_verify_live_rejects_unsafe_scope(
 ) -> None:
     path = tmp_path / "config.yaml"
     path.write_text("version: 1\nmode: live\nproviders:\n  " + provider_yaml, encoding="utf-8")
-    assert run(
-        ["verify-live", "--config", str(path), "--provider", provider, "--confirm-read-only"]
-    ) == 1
+    assert (
+        run(["verify-live", "--config", str(path), "--provider", provider, "--confirm-read-only"])
+        == 1
+    )
     assert failure in capsys.readouterr().out
