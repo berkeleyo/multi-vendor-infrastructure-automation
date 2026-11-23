@@ -5,4 +5,4 @@ resources:
     id: /subscriptions/00000000-0000-4000-8000-000000000001/resourceGroups/rg-portfolio/providers/Microsoft.Network/virtualNetworks/vnet-portfolio
     name: vnet-portfolio
     location: uksouth
-    attributes: {address_prefixes: [10.20.0.0/16], resource_group: rg-portfolio}
+    attributes: {address_prefixes: [198.51.100.0/24], resource_group: rg-portfolio}

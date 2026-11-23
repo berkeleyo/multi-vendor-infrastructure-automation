@@ -30,7 +30,7 @@ class AwsClient:
                         "Vpcs": [
                             {
                                 "VpcId": "vpc-1",
-                                "CidrBlock": "10.0.0.0/16",
+                                "CidrBlock": "192.0.2.0/24",
                                 "State": "available",
                                 "Tags": [{"Key": "Name", "Value": "main"}],
                             }
@@ -45,7 +45,7 @@ class AwsClient:
                         {
                             "SubnetId": "subnet-1",
                             "VpcId": "vpc-1",
-                            "CidrBlock": "10.0.1.0/24",
+                            "CidrBlock": "192.0.2.0/25",
                             "AvailabilityZone": "eu-west-2a",
                         }
                     ]
@@ -71,19 +71,19 @@ def test_azure_normalization() -> None:
     subnet = SimpleNamespace(
         id="/subscriptions/s/resourceGroups/g/providers/Microsoft.Network/virtualNetworks/v/subnets/s",
         name="s",
-        address_prefix="10.0.1.0/24",
+        address_prefix="192.0.2.0/25",
         address_prefixes=None,
     )
     vnet = SimpleNamespace(
         id="/subscriptions/s/resourceGroups/g/providers/Microsoft.Network/virtualNetworks/v",
         name="v",
         location="uksouth",
-        address_space=SimpleNamespace(address_prefixes=["10.0.0.0/16"]),
+        address_space=SimpleNamespace(address_prefixes=["192.0.2.0/24"]),
         subnets=[subnet],
     )
     client = SimpleNamespace(virtual_networks=SimpleNamespace(list_all=lambda: [vnet]))
     result = AzureProvider(ProviderConfig(subscription_id="s"), client).discover()
-    assert result[1].attributes["address_prefixes"] == ["10.0.1.0/24"]
+    assert result[1].attributes["address_prefixes"] == ["192.0.2.0/25"]
 
 
 def test_azure_missing_subscription_and_malformed_id() -> None:

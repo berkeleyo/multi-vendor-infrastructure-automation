@@ -22,6 +22,8 @@ jobs:
       - run: mypy src
       - run: pytest
       - run: mvia drift --config examples/offline.yaml --desired examples/desired.yaml
+      - name: Build container image
+        run: docker build --tag mvia:v0.2 .
   dependency-security:
     runs-on: ubuntu-latest
     timeout-minutes: 10
