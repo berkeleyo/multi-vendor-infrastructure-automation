@@ -26,6 +26,9 @@ class ApplicationService:
         desired = load_inventory(desired_path)
         return compare(desired, actual)
 
+    def discover_config(self, config: AppConfig, *, config_dir: Path | None = None) -> Inventory:
+        return discover_inventory(config, config_dir=config_dir or Path.cwd())
+
 
 def discover_inventory(config: AppConfig, *, config_dir: Path) -> Inventory:
     """Preserve existing discovery behavior in a reusable application operation."""
