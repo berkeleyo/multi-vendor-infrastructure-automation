@@ -6,3 +6,7 @@ Secrets are accepted only through standard AWS/Azure credential chains or `CLOUD
 
 Report vulnerabilities privately to the repository owner. This portfolio repository contains no production credentials or real infrastructure identifiers.
 
+## v0.2 control-plane controls
+
+Network diagnostics reject IP literals and private, loopback, link-local, multicast, reserved and unspecified targets by default. Redirect destinations are revalidated, response size and redirects are bounded, and sensitive headers are filtered. API correlation IDs are bounded and returned with responses. Private diagnostics may only be enabled through server-side deployment policy, never client request parameters. Containers run as a dedicated non-root user.
+

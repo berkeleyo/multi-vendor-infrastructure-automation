@@ -1,13 +1,13 @@
 schema_version: 1
 resources:
-  - {provider: aws, kind: vpc, id: vpc-00000000000000001, name: portfolio-vpc, location: eu-west-2, attributes: {cidr: 10.10.0.0/16, is_default: false, state: available}}
-  - {provider: aws, kind: subnet, id: subnet-00000000000000001, name: portfolio-web-a, location: eu-west-2a, attributes: {cidr: 10.10.1.0/24, vpc_id: vpc-00000000000000001, available_ip_count: 251}}
+  - {provider: aws, kind: vpc, id: vpc-00000000000000001, name: portfolio-vpc, location: eu-west-2, attributes: {cidr: 192.0.2.0/24, is_default: false, state: available}}
+  - {provider: aws, kind: subnet, id: subnet-00000000000000001, name: portfolio-web-a, location: eu-west-2a, attributes: {cidr: 192.0.2.0/24, vpc_id: vpc-00000000000000001, available_ip_count: 251}}
   - provider: azure
     kind: virtual_network
     id: /subscriptions/00000000-0000-4000-8000-000000000001/resourceGroups/rg-portfolio/providers/Microsoft.Network/virtualNetworks/vnet-portfolio
     name: vnet-portfolio
     location: uksouth
-    attributes: {address_prefixes: [10.20.0.0/16], resource_group: rg-portfolio}
+    attributes: {address_prefixes: [198.51.100.0/24], resource_group: rg-portfolio}
   - {provider: cloudflare, kind: zone, id: "00000000000000000000000000000001", name: portfolio.example, attributes: {status: active, paused: false}}
   - {provider: cloudflare, kind: dns_record, id: "00000000000000000000000000000002", name: api.portfolio.example, attributes: {zone_id: "00000000000000000000000000000001", type: A, content: 192.0.2.10, proxied: true, ttl: 1}}
   - {provider: palo_alto, kind: address_object, id: documentation-service, name: documentation-service, attributes: {value: 198.51.100.10, value_type: ip-netmask, description: Synthetic documentation endpoint}}

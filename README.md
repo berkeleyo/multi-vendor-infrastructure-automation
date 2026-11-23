@@ -61,3 +61,27 @@ See [RUNBOOK.md](RUNBOOK.md) and [security](docs/SECURITY.md).
 
 All sample infrastructure is invented. Domains use `.example`; IP addresses use RFC 5737 documentation ranges; identifiers are synthetic.
 
+## Version 0.2
+
+This release adds a FastAPI control plane and provider-neutral DNS, TLS and HTTP diagnostics while preserving the existing read-only CLI and provider adapters. It does not add provider mutations, Terraform execution, Kubernetes, AI-driven changes or live infrastructure deployment.
+
+## API quick start
+
+```bash
+.venv/bin/mvia-api
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/api/v1/providers
+curl -X POST http://127.0.0.1:8000/api/v1/discovery
+curl -X POST http://127.0.0.1:8000/api/v1/drift
+```
+
+Diagnostic endpoints reject IP literals and private, loopback, link-local, multicast and reserved targets. Private diagnostics require server-side policy configuration and are disabled by default.
+
+## Docker quick start
+
+```bash
+docker build -t mvia:v0.2 .
+docker run --rm -p 8000:8000 mvia:v0.2
+curl http://127.0.0.1:8000/health
+```
+
