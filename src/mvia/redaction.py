@@ -3,7 +3,17 @@
 import re
 from typing import Any
 
-SENSITIVE = ("authorization", "token", "secret", "password", "api_key", "apikey")
+SENSITIVE = (
+    "authorization",
+    "cookie",
+    "set-cookie",
+    "token",
+    "secret",
+    "password",
+    "api_key",
+    "apikey",
+    "x-api-key",
+)
 
 
 def redact(value: Any) -> Any:

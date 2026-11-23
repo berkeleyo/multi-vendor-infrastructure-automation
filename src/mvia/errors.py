@@ -11,3 +11,11 @@ class ConfigurationError(MviaError):
 
 class ProviderError(MviaError):
     """A provider could not complete discovery."""
+
+
+class UnsafeTargetError(MviaError, ValueError):
+    """A network target is rejected by the diagnostic security policy."""
+
+
+class DiagnosticError(MviaError):
+    """A deterministic diagnostic operation failed operationally."""

@@ -7,11 +7,9 @@ from pathlib import Path
 from typing import Any, Never
 
 from mvia import __version__
-from mvia.drift import compare
+from mvia.application import ApplicationService
 from mvia.errors import MviaError
-from mvia.models import load_config, load_inventory
 from mvia.redaction import redact
-from mvia.service import discover
 
 
 class JsonArgumentParser(argparse.ArgumentParser):
@@ -41,7 +39,8 @@ def parser() -> argparse.ArgumentParser:
 def run(argv: list[str] | None = None) -> int:
     try:
         args = parser().parse_args(argv)
-        config = load_config(args.config)
+        service = ApplicationService()
+        config = service.validate_config(args.config)
         if args.command == "validate":
             emit(
                 {
@@ -52,11 +51,11 @@ def run(argv: list[str] | None = None) -> int:
                 }
             )
             return 0
-        actual = discover(config, config_dir=args.config.resolve().parent)
         if args.command == "discover":
+            actual = service.discover(args.config)
             emit({"ok": True, "command": "discover", "data": actual.model_dump(mode="json")})
             return 0
-        report = compare(load_inventory(args.desired), actual)
+        report = service.drift(args.config, args.desired)
         emit({"ok": True, "command": "drift", "data": report.model_dump(mode="json")})
         return 0 if report.in_sync else 2
     except MviaError as exc:
