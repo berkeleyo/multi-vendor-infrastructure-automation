@@ -8,8 +8,11 @@ RUN python -m pip install --no-cache-dir pip==26.3 \
 FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
-RUN groupadd --gid 10001 mvia && useradd --uid 10001 --gid mvia --create-home mvia
+# Remove base-image pip before copying the build's reviewed installation.
+RUN python -m pip uninstall --yes pip \
+    && groupadd --gid 10001 mvia && useradd --uid 10001 --gid mvia --create-home mvia
 COPY --from=build /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=build /usr/local/bin/pip /usr/local/bin/pip3 /usr/local/bin/pip3.12 /usr/local/bin/
 COPY --from=build /usr/local/bin/mvia /usr/local/bin/mvia
 COPY --from=build /usr/local/bin/mvia-api /usr/local/bin/mvia-api
 COPY pyproject.toml README.md LICENSE ./
