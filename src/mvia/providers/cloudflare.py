@@ -25,6 +25,8 @@ class CloudflareProvider(Provider):
             resources: list[Resource] = []
             zones = list(self.api.cloudflare_pages("/zones"))
             selected = [zone for zone in zones if not self.zone_ids or zone["id"] in self.zone_ids]
+            if set(self.zone_ids).difference(zone["id"] for zone in selected):
+                raise ProviderError("one or more requested Cloudflare zones were not returned")
             for zone in selected:
                 resources.append(
                     Resource(

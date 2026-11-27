@@ -38,6 +38,12 @@ jobs:
             jq --exit-status 'any(.resources[]; .provider == "cloudflare" and .name == "api.portfolio.example")'
           curl --fail --silent --show-error --max-time 5 --request POST "$api/api/v1/drift" |
             jq --exit-status '.in_sync == true and .items == []'
+          docker exec "$container_id" python -m pip list --format=freeze \
+            --exclude multi-vendor-infrastructure-automation > "$RUNNER_TEMP/mvia-image-requirements.txt"
+      - name: Audit the dependencies installed in the image
+        run: |
+          python -m pip install --constraint constraints-ci.txt pip-audit==2.10.1
+          pip-audit --no-deps --disable-pip --requirement "$RUNNER_TEMP/mvia-image-requirements.txt"
   dependency-security:
     runs-on: ubuntu-latest
     timeout-minutes: 10

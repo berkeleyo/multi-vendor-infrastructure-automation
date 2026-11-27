@@ -115,6 +115,13 @@ def test_cloudflare_normalization() -> None:
     assert [item.kind for item in result] == ["zone", "dns_record"]
 
 
+@pytest.mark.parametrize("zone_ids", [["missing"], ["z1", "missing"]])
+def test_cloudflare_rejects_incomplete_requested_scope(zone_ids: list[str]) -> None:
+    provider = CloudflareProvider(ProviderConfig(zone_ids=zone_ids), CloudflareApi())  # type: ignore[arg-type]
+    with pytest.raises(ProviderError, match="requested Cloudflare zones were not returned"):
+        provider.discover()
+
+
 def test_cloudflare_requires_token(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("CLOUDFLARE_API_TOKEN", raising=False)
     with pytest.raises(ConfigurationError, match="CLOUDFLARE_API_TOKEN"):
