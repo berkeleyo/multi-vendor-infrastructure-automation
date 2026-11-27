@@ -32,7 +32,7 @@ jobs:
           api=http://127.0.0.1:8000
 
           curl --fail --silent --show-error --max-time 3 --retry 10 \
-            --retry-connrefused --retry-delay 1 "$api/health" |
+            --retry-all-errors --retry-delay 1 "$api/health" |
             jq --exit-status '.status == "healthy"'
           curl --fail --silent --show-error --max-time 5 --request POST "$api/api/v1/discovery" |
             jq --exit-status 'any(.resources[]; .provider == "cloudflare" and .name == "api.portfolio.example")'
