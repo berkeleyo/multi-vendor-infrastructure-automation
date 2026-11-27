@@ -1,10 +1,19 @@
 """Desired-state comparison."""
 
-from mvia.models import DriftItem, DriftReport, Inventory, Resource
+from typing import Any
+
+from mvia.models import DriftItem, DriftReport, Inventory, ProviderName, Resource
 
 
 def _key(resource: Resource) -> str:
     return f"{resource.provider}/{resource.kind}/{resource.id}"
+
+
+def _configuration(resource: Resource) -> dict[str, Any]:
+    data = resource.model_dump(mode="json")
+    if resource.provider is ProviderName.AWS and resource.kind == "subnet":
+        data["attributes"].pop("available_ip_count", None)
+    return data
 
 
 def compare(desired: Inventory, actual: Inventory) -> DriftReport:
@@ -17,8 +26,8 @@ def compare(desired: Inventory, actual: Inventory) -> DriftReport:
         elif key not in wanted:
             items.append(DriftItem(status="unexpected", key=key, actual=found[key]))
         else:
-            left = wanted[key].model_dump(mode="json")
-            right = found[key].model_dump(mode="json")
+            left = _configuration(wanted[key])
+            right = _configuration(found[key])
             differences = sorted(field for field in left if left[field] != right[field])
             if differences:
                 items.append(

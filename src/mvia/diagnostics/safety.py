@@ -30,7 +30,11 @@ def validate_hostname(hostname: str) -> str:
 
 
 def validate_url(url: str) -> tuple[str, str, int]:
-    parsed = urlsplit(url)
+    try:
+        parsed = urlsplit(url)
+        port = parsed.port
+    except ValueError as exc:
+        raise UnsafeTargetError("URL contains an invalid hostname or port") from exc
     if parsed.scheme.lower() not in {"http", "https"}:
         raise UnsafeTargetError("only HTTP and HTTPS URLs are allowed")
     if parsed.username or parsed.password:
@@ -38,7 +42,10 @@ def validate_url(url: str) -> tuple[str, str, int]:
     if not parsed.hostname:
         raise UnsafeTargetError("URL does not contain a valid hostname")
     hostname = validate_hostname(parsed.hostname)
-    port = parsed.port or (443 if parsed.scheme.lower() == "https" else 80)
+    if port == 0:
+        raise UnsafeTargetError("URL contains an invalid port")
+    if port is None:
+        port = 443 if parsed.scheme.lower() == "https" else 80
     return parsed.scheme.lower(), hostname, port
 
 
@@ -48,12 +55,10 @@ def is_blocked_ip(address: str) -> bool:
     except ValueError:
         return True
     return bool(
-        ip.is_private
-        or ip.is_loopback
-        or ip.is_link_local
+        not ip.is_global
         or ip.is_multicast
         or ip.is_reserved
-        or ip.is_unspecified
+        or (isinstance(ip, ipaddress.IPv6Address) and ip.is_site_local)
     )
 
 
@@ -62,7 +67,7 @@ def resolve_public_addresses(hostname: str) -> list[str]:
         entries = socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM)
     except socket.gaierror as exc:
         raise UnsafeTargetError("hostname could not be resolved safely") from exc
-    addresses = sorted({str(entry[4][0]) for entry in entries})
+    addresses = list(dict.fromkeys(str(entry[4][0]) for entry in entries))
     if not addresses:
         raise UnsafeTargetError("hostname resolved to no addresses")
     blocked = [address for address in addresses if is_blocked_ip(address)]

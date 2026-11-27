@@ -16,11 +16,29 @@ class TLSDiagnostic:
 
     def run(self, request: TLSRequest) -> TLSResult:
         hostname = validate_hostname(request.hostname)
-        resolve_public_addresses(hostname)
         start = time.monotonic()
+        addresses = resolve_public_addresses(hostname)
+        deadline = start + self.timeout
         context = ssl.create_default_context()
         try:
-            with socket.create_connection((hostname, request.port), timeout=self.timeout) as raw:
+            for address in addresses:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TimeoutError
+                try:
+                    raw_socket = socket.create_connection(
+                        (address, request.port), timeout=remaining
+                    )
+                except OSError:
+                    if address != addresses[-1]:
+                        continue
+                    raise
+                break
+            with raw_socket as raw:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise TimeoutError
+                raw.settimeout(remaining)
                 with context.wrap_socket(raw, server_hostname=hostname) as tls:
                     certificate_raw = tls.getpeercert()
                     certificate = certificate_raw if isinstance(certificate_raw, dict) else {}
@@ -54,9 +72,6 @@ class TLSDiagnostic:
                     not_after_raw = certificate.get("notAfter") if certificate else None
                     not_before = not_before_raw if isinstance(not_before_raw, str) else None
                     not_after = not_after_raw if isinstance(not_after_raw, str) else None
-                    hostname_valid = (
-                        bool(certificate) and ssl.match_hostname(certificate, hostname) is None
-                    )
                     duration = (time.monotonic() - start) * 1000
                     return TLSResult(
                         hostname=hostname,
@@ -70,7 +85,7 @@ class TLSDiagnostic:
                         san=san,
                         not_before=not_before,
                         not_after=not_after,
-                        hostname_valid=hostname_valid,
+                        hostname_valid=True,
                         chain_validation="valid",
                         duration_ms=round(duration, 3),
                     )

@@ -48,6 +48,26 @@ def test_drift_changed_and_missing() -> None:
     assert report.items[0].differences == ["name"]
 
 
+def test_aws_subnet_utilization_is_not_configuration_drift() -> None:
+    subnet = Resource(
+        provider=ProviderName.AWS,
+        kind="subnet",
+        id="synthetic-subnet",
+        name="sample",
+        attributes={"cidr": "192.0.2.0/24", "available_ip_count": 251},
+    )
+    desired = Inventory(resources=[subnet])
+    actual_subnet = subnet.model_copy(
+        update={"attributes": {**subnet.attributes, "available_ip_count": 250}}
+    )
+    assert compare(desired, Inventory(resources=[actual_subnet])).in_sync
+
+    actual_subnet.attributes["cidr"] = "192.0.2.0/25"
+    report = compare(desired, Inventory(resources=[actual_subnet]))
+    assert report.items[0].differences == ["attributes"]
+    assert subnet.attributes["available_ip_count"] == 251
+
+
 def test_invalid_configuration_returns_json(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

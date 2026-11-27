@@ -8,5 +8,5 @@ Report vulnerabilities privately to the repository owner. This portfolio reposit
 
 ## v0.2 control-plane controls
 
-Network diagnostics reject IP literals and private, loopback, link-local, multicast, reserved and unspecified targets by default. Redirect destinations are revalidated, response size and redirects are bounded, and sensitive headers are filtered. API correlation IDs are bounded and returned with responses. Private diagnostics may only be enabled through server-side deployment policy, never client request parameters. Containers run as a dedicated non-root user.
+Network diagnostics reject IP literals and addresses that are not globally routable unicast. HTTP and TLS connect directly to a validated address, with the original hostname used for HTTP Host and TLS certificate verification. HTTP ignores environment proxies, validates each redirect, and limits bytes read from the final response. The HTTP request budget is shared across redirects and checked during streaming. The operating system handles the initial DNS resolution. Containers run as a dedicated non-root user, and the documented Docker command publishes the API to loopback on the host.
 

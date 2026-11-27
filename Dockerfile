@@ -2,7 +2,8 @@ FROM python:3.12-slim AS build
 WORKDIR /app
 COPY pyproject.toml README.md LICENSE constraints-ci.txt ./
 COPY src ./src
-RUN python -m pip install --upgrade pip && python -m pip install --no-cache-dir .
+RUN python -m pip install --no-cache-dir pip==26.3 \
+    && PIP_BUILD_CONSTRAINT=constraints-ci.txt python -m pip install --no-cache-dir --constraint constraints-ci.txt .
 
 FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1

@@ -48,7 +48,8 @@ Live integrations only read. Creation, update, deletion, deployment, and Palo Al
 
 Install provider extras only when needed: `pip install -e '.[aws,azure]'`. See [RUNBOOK.md](RUNBOOK.md), [architecture](docs/ARCHITECTURE.md), and [security](docs/SECURITY.md).
 
-CI installs and audits the reviewed base, AWS, and Azure Python resolution in `constraints-ci.txt`. Runtime dependency ranges remain
+CI installs and audits the reviewed base, AWS, and Azure Python resolution in `constraints-ci.txt`.
+The Docker image uses the same constraints, and CI audits its installed dependencies. Runtime dependency ranges remain
 in `pyproject.toml` so downstream users can receive compatible security fixes; update the constraints
 file deliberately after testing and auditing.
 
@@ -56,7 +57,7 @@ file deliberately after testing and auditing.
 
 The `verify-live` command makes an explicit, read-only API discovery request against **one
 configured provider at a time**. It refuses offline fixtures, missing confirmation, disabled
-providers and disabled TLS verification. Cloudflare requires explicit `zone_ids`.
+providers and disabled TLS verification. Cloudflare requires explicit `zone_ids` and fails if any requested zone is missing from discovery.
 
 ```bash
 # Only after replacing placeholder values and arranging least-privilege read credentials:
@@ -92,7 +93,7 @@ curl -X POST http://127.0.0.1:8000/api/v1/discovery
 curl -X POST http://127.0.0.1:8000/api/v1/drift
 ```
 
-Diagnostic endpoints reject IP literals and private, loopback, link-local, multicast and reserved targets. Private diagnostics require server-side policy configuration and are disabled by default.
+Diagnostic endpoints reject IP literals and non-public targets. HTTP and TLS connect to a validated address and retain hostname verification for HTTPS and TLS. Run the API locally or behind a trusted access boundary.
 
 ## Docker quick start
 
