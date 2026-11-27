@@ -14,6 +14,23 @@ python3 -m venv .venv
 
 Exit codes are `0` for success/in-sync, `1` for configuration or provider errors, and `2` when drift exists. Operational commands write a JSON document to stdout; conventional `--help` and `--version` output is plain text.
 
+### Offline drift example
+
+Change the expected address of the synthetic Cloudflare record `api.portfolio.example` from
+`192.0.2.10` to `192.0.2.20` in a temporary desired-state file, then compare it with fixture discovery:
+
+```bash
+desired=$(mktemp)
+sed 's/content: 192\.0\.2\.10,/content: 192.0.2.20,/' examples/desired.yaml > "$desired"
+.venv/bin/mvia drift --config examples/offline.yaml --desired "$desired"
+echo "Exit code: $?"
+rm -f "$desired"
+```
+
+The JSON report includes `data.in_sync: false` and a `data.summary` of
+`{"changed": 1, "missing": 0, "unexpected": 0}`. The changed item shows the desired and actual
+addresses. Exit code `2` lets a pipeline flag drift for review.
+
 ## Supported live discovery
 
 The adapters below are implemented against their documented public interfaces and tested with
@@ -81,7 +98,14 @@ Diagnostic endpoints reject IP literals and private, loopback, link-local, multi
 
 ```bash
 docker build -t mvia:v0.2 .
-docker run --rm -p 8000:8000 mvia:v0.2
-curl http://127.0.0.1:8000/health
+docker run --rm -p 127.0.0.1:8000:8000 mvia:v0.2
+```
+
+With the container running, open another terminal and try:
+
+```bash
+curl --fail http://127.0.0.1:8000/health
+curl --fail -X POST http://127.0.0.1:8000/api/v1/discovery
+curl --fail -X POST http://127.0.0.1:8000/api/v1/drift
 ```
 
