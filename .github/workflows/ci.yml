@@ -24,6 +24,20 @@ jobs:
       - run: mvia drift --config examples/offline.yaml --desired examples/desired.yaml
       - name: Build container image
         run: docker build --tag mvia:v0.2 .
+      - name: Smoke test the published container API
+        shell: bash
+        run: |
+          container_id=$(docker run --detach --publish 127.0.0.1:8000:8000 mvia:v0.2)
+          trap 'docker logs "$container_id"; docker rm --force "$container_id"' EXIT
+          api=http://127.0.0.1:8000
+
+          curl --fail --silent --show-error --max-time 3 --retry 10 \
+            --retry-all-errors --retry-delay 1 "$api/health" |
+            jq --exit-status '.status == "healthy"'
+          curl --fail --silent --show-error --max-time 5 --request POST "$api/api/v1/discovery" |
+            jq --exit-status 'any(.resources[]; .provider == "cloudflare" and .name == "api.portfolio.example")'
+          curl --fail --silent --show-error --max-time 5 --request POST "$api/api/v1/drift" |
+            jq --exit-status '.in_sync == true and .items == []'
   dependency-security:
     runs-on: ubuntu-latest
     timeout-minutes: 10
