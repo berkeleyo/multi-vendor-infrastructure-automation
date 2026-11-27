@@ -13,8 +13,8 @@ class AwsProvider(Provider):
             raise ConfigurationError("AWS live mode requires region")
         if client is None:
             try:
-                import boto3  # type: ignore[import-untyped]
-                from botocore.config import Config  # type: ignore[import-untyped]
+                import boto3
+                from botocore.config import Config
             except ImportError as exc:
                 raise ConfigurationError("install the 'aws' extra for AWS live mode") from exc
             client = boto3.client(
